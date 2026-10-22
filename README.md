@@ -1,1 +1,1 @@
-# EAD-hailemariam-dagnew-ugr-0344-16
+# Lab 1: Java Maven Starter Project

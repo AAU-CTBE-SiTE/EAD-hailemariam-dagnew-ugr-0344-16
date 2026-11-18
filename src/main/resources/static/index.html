@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actor Management - Lab 7</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f4f49; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<h1>🎬 Actor Management System (Lab 7)</h1>
+
+<!-- Add Actor Form -->
+<div class="card">
+    <h3>Add New Actor</h3>
+    <input type="text" id="name" placeholder="Actor Name (e.g., Tom Hanks)">
+    <input type="text" id="movieName" placeholder="Movie Name (e.g., Forrest Gump)">
+    <button onclick="createActor()">Save Actor</button>
+</div>
+
+<!-- Actor List Table -->
+<div class="card">
+    <h3>Actor List</h3>
+    <button onclick="loadActors()">Refresh List</button>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Movie Name</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="actorTableBody">
+        <!-- Dynamically populated -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = 'http://localhost:8081/api/v1/actor';
+
+    async function loadActors() {
+        try {
+            const response = await fetch(API_URL);
+            const actors = await response.json();
+            const tbody = document.getElementById('actorTableBody');
+            tbody.innerHTML = '';
+
+            actors.forEach(actor => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${actor.id}</td>
+                        <td>${actor.name}</td>
+                        <td>${actor.movieName}</td>
+                        <td><button style="background:red;" onclick="deleteActor(${actor.id})">Delete</button></td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error('Error loading actors:', error);
+        }
+    }
+
+    async function createActor() {
+        const name = document.getElementById('name').value;
+        const movieName = document.getElementById('movieName').value;
+
+        if (!name || !movieName) {
+            alert('Please fill in both fields.');
+            return;
+        }
+
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, movieName })
+        });
+
+        document.getElementById('name').value = '';
+        document.getElementById('movieName').value = '';
+        loadActors();
+    }
+
+    async function deleteActor(id) {
+        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        loadActors();
+    }
+
+    // Load actors when page opens
+    loadActors();
+</script>
+
+</body>
+</html>
